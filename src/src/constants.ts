@@ -1,5 +1,5 @@
-const CANVAS_W = 100
-const CANVAS_H = 100
+const CANVAS_W = 200
+const CANVAS_H = 200
 const STEP_SIZE = 20
 const SUBJECT_SIZE = STEP_SIZE
 

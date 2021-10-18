@@ -1,4 +1,4 @@
-import { Directions, Guy } from '../../global.types'
+import { Directions, Guy, IdLocation } from '../../global.types'
 import { CANVAS_H, CANVAS_W, STEP_SIZE, SUBJECT_SIZE } from '../constants'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -24,7 +24,7 @@ export const generateEntities = (amount: number): Guy[] => {
       y: getRandomPositionInMatrix(STEP_SIZE, CANVAS_W, STEP_SIZE),
       w: SUBJECT_SIZE,
       h: SUBJECT_SIZE,
-      theGuy: i === amount - 1,
+      theGuy: i === amount - 1, // Math.random() <= 0.5,
     }
 
     guys.push(newGuy)
@@ -68,14 +68,23 @@ export const randomMovement = (guy: Guy) => {
   }
 }
 
-export const getSurroundingGuys = (guys: Guy[], currentGuy: Guy): boolean => {
-  let areClose = false
+export const killGuy = (guys: Guy[], guyId: string) => {
+  const withoutTheGuy = guys.filter((guy) => guy.id !== guyId)
+  return withoutTheGuy
+}
+
+export const wolvesAndSheep = (guys: Guy[], currentGuy: Guy): Guy[] => {
+  // let areClose = false
+  let newGuys: Guy[] = guys
+  let aloneCaughtGuy = ''
+
   const areaAroundCurrentGuy: string[] = []
 
   const whitoutCurrentGuy = guys.filter((guy) => guy.id !== currentGuy.id)
-  const allGuysParsedLocations = whitoutCurrentGuy.map(
-    (guy) => `${guy.x},${guy.y}`
-  )
+  const allGuysParsedLocations: IdLocation[] = whitoutCurrentGuy.map((guy) => ({
+    id: guy.id,
+    location: `${guy.x},${guy.y}`,
+  }))
 
   const initialMatchPointX =
     currentGuy.x - STEP_SIZE <= CANVAS_W ? currentGuy.x - STEP_SIZE : 0
@@ -101,19 +110,42 @@ export const getSurroundingGuys = (guys: Guy[], currentGuy: Guy): boolean => {
     }
   }
 
-  let guysAround = 0
+  let guysAroundAmount = 0
 
-  areaAroundCurrentGuy.forEach((guyPosibleLocation) => {
-    if (allGuysParsedLocations.includes(guyPosibleLocation)) {
-      const thisMuch = allGuysParsedLocations.filter((normalGuyLocation) =>
-        areaAroundCurrentGuy.includes(normalGuyLocation)
-      ).length
+  const justAllGuysLocations = allGuysParsedLocations.map((guy) => guy.location) // [20,40, 10,20, 40,60, 80,20]
 
-      guysAround = thisMuch
-    }
-  })
+  // areaAroundCurrentGuy.forEach((currentGuyPosibleLocation) => {
+  //   if (justAllGuysLocations.includes(currentGuyPosibleLocation)) {
+  //     const guysAround = allGuysParsedLocations.filter((guyLocation) =>
+  //       areaAroundCurrentGuy.includes(guyLocation.location)
+  //     )
 
-  areClose = guysAround > 0
+  //     guysAroundAmount = guysAround.length
+  //     if (guysAroundAmount === 1 && currentGuy.theGuy) {
+  //       console.log('die!')
+  //       //   // caugth alone
+  //       //   aloneCaughtGuy = guysAround[0].id
+  //     }
+  //   }
+  // })
 
-  return areClose
+  const guysAround = allGuysParsedLocations.filter((guyLocation) =>
+    areaAroundCurrentGuy.includes(guyLocation.location)
+  )
+
+  guysAroundAmount = guysAround.length
+  // if (guysAroundAmount === 1 && currentGuy.theGuy) {
+  //   newGuys = killGuy(guys, guysAround[0].id)
+  // }
+
+  if (currentGuy.theGuy && guysAroundAmount >= 2) {
+    newGuys = killGuy(guys, currentGuy.id)
+    console.log('Died')
+  }
+
+  // if (currentGuy.theGuy && guysAroundAmount === 1) {
+  //   newGuys = killGuy(guys, aloneCaughtGuy)
+  // }
+
+  return newGuys
 }

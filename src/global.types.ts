@@ -12,3 +12,5 @@ export type Directions =
   | 1 // Right
   | 2 // Down
   | 3 // Left
+
+export type IdLocation = { id: string; location: string }

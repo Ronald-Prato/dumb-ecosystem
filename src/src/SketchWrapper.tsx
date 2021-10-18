@@ -3,7 +3,8 @@ import { CANVAS_H, CANVAS_W } from './constants'
 import p5Types from 'p5'
 import {
   generateEntities,
-  getSurroundingGuys,
+  wolvesAndSheep,
+  killGuy,
   randomMovement,
 } from './utils/life'
 import { Guy } from '../global.types'
@@ -13,8 +14,8 @@ let guys: Guy[] = []
 export const MainSketch = () => {
   const setup = (p5: p5Types, canvasParentRef: Element) => {
     p5.createCanvas(CANVAS_H, CANVAS_W).parent(canvasParentRef)
-    p5.frameRate(10)
-    guys = generateEntities(3)
+    p5.frameRate(2)
+    guys = generateEntities(10)
   }
 
   const draw = (p5: p5Types) => {
@@ -30,9 +31,10 @@ export const MainSketch = () => {
     // Movement of guys
     for (let i = 0; i < guys.length; i++) {
       randomMovement(guys[i])
+      const theGuy = guys.filter((x) => x.theGuy)[0]
 
       // Close interaction
-      getSurroundingGuys(guys, guys[i])
+      guys = wolvesAndSheep(guys, guys[i])
     }
   }
 
